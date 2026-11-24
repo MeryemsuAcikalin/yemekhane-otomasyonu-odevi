@@ -99,12 +99,19 @@ async function sayfaAc(ad){
             await puanlanabilirMenuleriGetir();
         }else if (ad === 'yonetim'){
             await yoneticiMenuleriniGetir();
+        }else if (ad === 'profil'){
+           await profilBilgileriniGetir();
         }
     }catch(hata){
         bildirimMesaji(hata.message,true);
     }
 }
-
+async function profilBilgileriniGetir(){
+    const bilgiler = await istek('/api/profil');
+    const secili = bilgiler.secili_alerjenler.map(Number);
+    eleman('alerjenSecimleri').innerHTML = bilgiler.alerjenler.map(alerjen => `<label style="display:block; margin:10px 0;"> <input type="checkbox" name="alerjen"
+    value="${Number(alerjen.id)}" ${secili.includes(Number(alerjen.id)) ? 'checked' : ''}> ${guvenlik(alerjen.ad)}</label>`).join('');
+}
 async function gununMenusunuGetir(){
     const yemekhane = eleman('yemekhane').value;
     const ogun = eleman('ogun').value;
@@ -127,6 +134,7 @@ async function gununMenusunuGetir(){
             <p>Kalori: ${guvenlik(yemek.kalori)}</p>
             <p>${Number(yemek.vejetaryen) === 1 ? 'Vejetaryen' : 'Vejetaryen değil'}</p>
             <p>Alerjenler: ${guvenlik(yemek.alerjenler || 'Belirtilmemiş')}</p>
+       ${yemek.alerjen_uyarisi ? '<p style="color:#b42318;font-weight:bold;">Dikkat bu yemekte seçtiğiniz bir alerjen bulunmakta.</p>': ''}
         </div>`
     ).join('');
     eleman('gunlukMenuSonucu').innerHTML =
@@ -159,7 +167,15 @@ async function haftalikMenuleriGetir(){
         const durum = mevcutRezervasyon ? mevcutRezervasyon.durum : 'yok';
         const acik = Number(menu.acik) === 1;
         const fiyat = kullanici.rol === 'ogrenci' ? menu.ogrenci_fiyati : menu.personel_fiyati;
-
+        const yarimSecilebilir = menu.ogun === 'Öğle' || menu.ogun === 'Akşam';
+        const yarimFiyat = (Math.round(Number(fiyat) * 60) / 100).toFixed(2);
+        const porsiyonSecimi = acik && durum !== 'aktif' && durum !== 'kullanildi' ? 
+        `<label>Porsiyon
+        <select data-porsiyon="${Number(menu.menu_id)}">
+            <option value="tam">Tam porsiyon - ${guvenlik(fiyat)} TL</option>
+            ${yarimSecilebilir ? `<option value="yarim">Yarım porsiyon - ${yarimFiyat} TL</option>`: ''}
+        </select>
+       </label>`: '';
         let buton = '';
 
         if (durum === 'aktif' || durum === 'kullanildi'){
@@ -181,6 +197,7 @@ async function haftalikMenuleriGetir(){
             <p>Doluluk: %${guvenlik(menu.doluluk_yuzde)}</p>
             <p>Son rezervasyon: ${guvenlik(menu.son_saat)}</p>
             <p>Rezervasyon durumunuz: ${guvenlik(durum)}</p>
+            ${porsiyonSecimi}
             ${buton}
         </div>`;
     }).join('')}</div>`;
@@ -199,6 +216,7 @@ async function rezervasyonBilgileriniGetir(){
             <h3>${guvenlik(rezervasyon.tarih)} - ${guvenlik(rezervasyon.ogun)}</h3>
             <p>Yemekhane: ${guvenlik(rezervasyon.yemekhane)}</p>
             <p>Durum: ${guvenlik(rezervasyon.durum)}</p>
+            <p>Porsiyon: ${rezervasyon.porsiyon === 'yarim' ? 'Yarım' : 'Tam'}</p>           
             <p>Ücret: ${guvenlik(rezervasyon.ucret)} TL</p>
             <p>İptal için son saat: ${guvenlik(rezervasyon.son_saat)}</p>
             ${Number(rezervasyon.iptal_acik) === 1 ? `<button type="button" data-iptal="${Number(rezervasyon.id)}">Rezervasyonu İptal Et</button>` : ''}
@@ -370,12 +388,12 @@ function formlariVeButonlariHazirla(){
         if (rezervasyon){
             hatalariBul(async () => {
                 const menuId = Number(rezervasyon.dataset.rezervasyon);
+                const porsiyonKutusu = rezervasyon.closest('.kart').querySelector('[data-porsiyon]');
+                const porsiyon = porsiyonKutusu ? porsiyonKutusu.value : 'tam';
                 rezervasyon.disabled = true;
 
                 try{
-                    const sonuc = await istek('/api/rezervasyon','POST',{
-                        menu_id: menuId
-                    });
+                const sonuc = await istek('/api/rezervasyon','POST',{menu_id: menuId,porsiyon: porsiyon});
                     await haftalikMenuleriGetir();
                     bildirimMesaji(`${sonuc.mesaj} Güncel bakiye: ${sonuc.bakiye} TL`);
                 }catch(hata){
@@ -409,6 +427,21 @@ function formlariVeButonlariHazirla(){
             hatalariBul(() => menuyuDuzenle(Number(duzenleButonu.dataset.duzenle)));
         }
     });
+    eleman('alerjenForm').addEventListener('submit',olay => {
+    olay.preventDefault();
+    hatalariBul(async () => {
+        const alerjenler = Array.from(
+            document.querySelectorAll(
+                '#alerjenSecimleri input[name="alerjen"]:checked'
+            )
+        ).map(kutu => Number(kutu.value));
+        const sonuc = await istek('/api/profil','PUT',{
+            alerjen_ids: alerjenler
+        });
+        bildirimMesaji(sonuc.mesaj);
+    });
+});
+
 }
 
 async function uygulamayiBaslat(){

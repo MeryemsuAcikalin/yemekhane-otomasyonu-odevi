@@ -103,13 +103,43 @@ function apiIsteginiIsle(string $adres,string $istek,array $gelen): array{
     }
     $kullaniciId = (int) $_SESSION['kullanici']['id'];
     $rol = $_SESSION['kullanici']['rol'];
+    
+    if ($adres === '/api/profil' && $istek === 'GET'){
+    return ['alerjenler' => alerjenSecenekleri(),'secili_alerjenler' => kullaniciAlerjenleri($kullaniciId)];
+    }
+    if ($adres === '/api/profil' && $istek === 'PUT'){
+    $secilenler = $gelen['alerjen_ids'] ?? null;
+    if (!is_array($secilenler) || count($secilenler) > 50){
+        hatalariGoster('Geçerli alerjen seçiniz.');
+    }
+    $gecerliIdler = array_map('intval',array_column(alerjenSecenekleri(),'id'));
+    $kontrolEdilenler = [];
+    foreach ($secilenler as $id){
+        if (!is_int($id) || !in_array($id,$gecerliIdler,true)){
+            hatalariGoster('Geçersiz alerjen seçimi.');
+        }
+        $kontrolEdilenler[] = $id;
+    }
+    $kontrolEdilenler = array_values(array_unique($kontrolEdilenler));
+    kullaniciAlerjenleriniKaydet($kullaniciId,$kontrolEdilenler);
+    return ['mesaj' => 'Alerjen tercihleriniz kaydedildi.'];
+}
     if ($adres === '/api/secenekler' && $istek === 'GET'){
         return MenuSecenekleri();
     }
 
-    if ($adres === '/api/bugun' && $istek === 'GET'){
-        return redisOnbellegindenMenuyuGetir(sayiKontrolu($_GET['yemekhane'] ?? null),sayiKontrolu($_GET['ogun'] ?? null));
+   if ($adres === '/api/bugun' && $istek === 'GET'){
+    $sonuc = redisOnbellegindenMenuyuGetir(sayiKontrolu($_GET['yemekhane'] ?? null),sayiKontrolu($_GET['ogun'] ?? null));
+    $profilAlerjenleri = kullaniciAlerjenleri($kullaniciId);
+
+    foreach ($sonuc['yemekler'] as &$yemek){
+        $yemekAlerjenleri = array_filter(array_map('intval',explode(',',(string) ($yemek['alerjen_idler'] ?? ''))));
+        $ortakAlerjenler = array_intersect($yemekAlerjenleri,$profilAlerjenleri);
+        $yemek['alerjen_uyarisi'] = count($ortakAlerjenler) > 0;
     }
+    unset($yemek);
+    return $sonuc;
+}
 
     if ($adres === '/api/hafta' && $istek === 'GET'){
         $menuler = haftalikMenuler();
@@ -123,11 +153,14 @@ function apiIsteginiIsle(string $adres,string $istek,array $gelen): array{
     if ($adres === '/api/rezervasyonlar' && $istek === 'GET'){
         return rezervasyonBilgileri($kullaniciId);
     }
-
-    if ($adres === '/api/rezervasyon' && $istek === 'POST'){
-        $rezervasyonSonucu = proseduruCalistir('sp_rezervasyon_yap',[$kullaniciId,sayiKontrolu($gelen['menu_id'] ?? null)]);
-        return ['mesaj' => 'Rezervasyonunuz oluşturuldu.','sonuc' => $rezervasyonSonucu,'bakiye' => guncelBakiye($kullaniciId,true)];
+if ($adres === '/api/rezervasyon' && $istek === 'POST'){
+    $porsiyon = $gelen['porsiyon'] ?? 'tam';
+    if (!is_string($porsiyon) || !in_array($porsiyon,['tam','yarim'],true)){
+        hatalariGoster('Geçerli bir porsiyon seçiniz.');
     }
+    $rezervasyonSonucu = proseduruCalistir('sp_rezervasyon_yap',[$kullaniciId,sayiKontrolu($gelen['menu_id'] ?? null),$porsiyon]);
+    return ['mesaj' => 'Rezervasyonunuz başarıyla oluşturuldu.','sonuc' => $rezervasyonSonucu,'bakiye' => guncelBakiye($kullaniciId,true)];
+}
 
     if (preg_match('~^/api/rezervasyon/(\d+)/iptal$~',$adres,$eslesenler) && $istek === 'POST'){
         $rezervasyonSonucu = proseduruCalistir('sp_rezervasyon_iptal',[$kullaniciId,sayiKontrolu($eslesenler[1])]);

@@ -55,9 +55,8 @@ return['yemekhaneler' => listele('SELECT id, ad, konum FROM yemekhaneler ORDER B
 }
 
 function gunlukMenu(int $yemekhane,int $ogun): array{
-    $menuBilgisi=listele("SELECT menu_id,DATE_FORMAT(tarih, '%Y-%m-%d') AS tarih,yemekhane,ogun,yemek,kategori,kalori,vejetaryen,alerjenler,ogrenci_fiyati,personel_fiyati FROM v_menu_detay
-        WHERE tarih=CURDATE() AND yemekhane_id = ? AND ogun_id = ?
-        ORDER BY kategori_sira, yemek",[$yemekhane, $ogun]);
+  $menuBilgisi=listele("SELECT menu_id,DATE_FORMAT(tarih, '%Y-%m-%d') AS tarih,yemekhane,ogun,yemek,kategori,kalori,vejetaryen,alerjenler,alerjen_idler,ogrenci_fiyati,personel_fiyati 
+  FROM v_menu_detay WHERE tarih=CURDATE() AND yemekhane_id = ? AND ogun_id = ? ORDER BY kategori_sira, yemek",[$yemekhane, $ogun]);
     return['yemekler' => $menuBilgisi,'toplamKalori' => array_sum(array_column($menuBilgisi, 'kalori'))];
 }
 
@@ -68,7 +67,7 @@ function haftalikMenuler(): array{
 }
 
 function rezervasyonBilgileri(int $kullaniciId): array{
-    return listele("SELECT r.id,r.durum,r.ucret,DATE_FORMAT(m.tarih, '%Y-%m-%d') AS tarih,y.ad AS yemekhane,o.ad AS ogun,DATE_FORMAT(TIMESTAMP(m.tarih, o.son_saat),'%Y-%m-%d %H:%i') AS son_saat,
+  return listele("SELECT r.id,r.durum,r.ucret,r.porsiyon,DATE_FORMAT(m.tarih, '%Y-%m-%d') AS tarih,y.ad AS yemekhane,o.ad AS ogun,DATE_FORMAT(TIMESTAMP(m.tarih, o.son_saat),'%Y-%m-%d %H:%i') AS son_saat,
     IF(r.durum = 'aktif' AND NOW() < TIMESTAMP(m.tarih, o.son_saat),1,0) AS iptal_acik FROM rezervasyonlar r JOIN menuler m ON m.id = r.menu_id JOIN yemekhaneler y ON y.id = m.yemekhane_id JOIN ogunler o
     ON o.id = m.ogun_id WHERE r.kullanici_id = ? ORDER BY m.tarih DESC, r.id DESC",[$kullaniciId]);
 }
@@ -143,6 +142,39 @@ function menuyuKaydet(?int $menuID, array $menuBilgisi): int{
 
         if ($db->inTransaction()) {
         $db->rollBack();
+        }
+        throw $hata;
+    }
+}
+// Sistemdeki alerjenleri listeler.
+function alerjenSecenekleri(): array{
+    return listele('SELECT id,ad FROM alerjenler ORDER BY ad');
+}
+
+// Kullanicinin profilinde sectigi alerjenleri getirir.
+function kullaniciAlerjenleri(int $kullaniciId): array{
+    $satirlar = listele(
+        'SELECT alerjen_id FROM kullanici_alerjenleri WHERE kullanici_id = ?',
+        [$kullaniciId],
+        true
+    );
+
+    return array_map('intval',array_column($satirlar,'alerjen_id'));
+}
+function kullaniciAlerjenleriniKaydet(int $kullaniciId,array $alerjenler): void{
+    $db = mySQLbaglantisi(true);
+    $db->beginTransaction();
+    try{
+        $sorgu = $db->prepare('DELETE FROM kullanici_alerjenleri WHERE kullanici_id = ?');
+        $sorgu->execute([$kullaniciId]);
+       $sorgu = $db->prepare('INSERT INTO kullanici_alerjenleri (kullanici_id,alerjen_id) VALUES (?,?)');
+        foreach ($alerjenler as $alerjenId){
+            $sorgu->execute([$kullaniciId,$alerjenId]);
+        }
+        $db->commit();
+    }catch(Throwable $hata){
+        if ($db->inTransaction()){
+            $db->rollBack();
         }
         throw $hata;
     }
