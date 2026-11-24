@@ -1,10 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yemekhane Otomasyonu</title>
-    <link rel="stylesheet" href="css/uygulama.css?v=5">
+    <link rel="stylesheet" href="css/uygulama.css?v=6">
 </head>
 <body>
 
@@ -41,6 +42,7 @@
                 <button type="button" data-sayfa="rez">Rezervasyonlarım</button>
                 <button type="button" data-sayfa="bakiye">Bakiyem</button>
                 <button type="button" data-sayfa="puan">Değerlendirme</button>
+                <button type="button" data-sayfa="profil">Profilim</button>
                 <button type="button" data-sayfa="yonetim" id="yonetimSekme" hidden>Yönetim</button>
             </nav>
 
@@ -131,6 +133,15 @@
                 </form>
             </section>
 
+            <section id="profil" class="sayfa" hidden>
+                <h2>Alerjen Tercihleri</h2>
+                <p>Alerjiniz olan alerjenleri seçebilirsiniz.</p>
+                <form id="alerjenForm">
+                <div id="alerjenSecimleri"></div>
+                    <button type="submit">Tercihlerimi Kaydet</button>
+                </form>
+            </section>
+
             <section id="yonetim" class="sayfa" hidden>
                 <h2>Yönetici Paneli</h2>
 
@@ -170,6 +181,6 @@
 
     </main>
 
-    <script src="js/uygulama.js"></script>
+    <script src="js/uygulama.js?v=6"></script>
 </body>
 </html>
