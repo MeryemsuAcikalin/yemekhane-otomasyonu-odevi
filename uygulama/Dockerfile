@@ -1,5 +1,10 @@
 FROM php:8.2-cli
-RUN apt-get update && apt-get install -y --no-install-recommends libonig-dev && docker-php-ext-install pdo_mysql mbstring && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libonig-dev \
+    && docker-php-ext-install pdo_mysql mbstring \
+    && rm -rf /var/lib/apt/lists/*
+RUN pecl install redis-6.2.0 \ 
+    && docker-php-ext-enable redis
 WORKDIR /app
 COPY . .
 EXPOSE 8000

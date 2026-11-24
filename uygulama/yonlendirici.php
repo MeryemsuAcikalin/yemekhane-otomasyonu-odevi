@@ -4,7 +4,11 @@ date_default_timezone_set('Europe/Istanbul');
 ini_set('display_errors','0');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
+require_once __DIR__ . '/redis.php';
+ini_set('session.gc_maxlifetime','1800');
+ini_set('session.use_strict_mode','1');
 session_set_cookie_params(['httponly' => true,'samesite' => 'Lax','path' => '/']);
+session_set_save_handler(new RedisOturumYonetici(),true);
 session_start();
 require_once __DIR__ . '/islemler.php';
 

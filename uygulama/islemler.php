@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/redis.php';
 
 function hatalariGoster(string $hataMesaji,int $durumKodu = 400): never{
     http_response_code($durumKodu);
@@ -107,7 +108,7 @@ function apiIsteginiIsle(string $adres,string $istek,array $gelen): array{
     }
 
     if ($adres === '/api/bugun' && $istek === 'GET'){
-        return gunlukMenu(sayiKontrolu($_GET['yemekhane'] ?? null),sayiKontrolu($_GET['ogun'] ?? null));
+        return redisOnbellegindenMenuyuGetir(sayiKontrolu($_GET['yemekhane'] ?? null),sayiKontrolu($_GET['ogun'] ?? null));
     }
 
     if ($adres === '/api/hafta' && $istek === 'GET'){
@@ -172,7 +173,7 @@ function apiIsteginiIsle(string $adres,string $istek,array $gelen): array{
         }
 
         if ($adres === '/api/yonetim' && $istek === 'POST'){
-            return ['mesaj' => 'Yeni menü kaydedildi.','menu_id' => menuyuKaydet(null,menuBilgileriniDogrula($gelen))];
+            return ['mesaj' => 'Yeni menü kaydedildi.','menu_id' => menuyuKaydetVeOnbellegiSil(null,menuBilgileriniDogrula($gelen))];
         }
 
         if (preg_match('~^/api/yonetim/(\d+)/yemekler$~',$adres,$eslesenler) && $istek === 'GET'){
@@ -180,7 +181,7 @@ function apiIsteginiIsle(string $adres,string $istek,array $gelen): array{
         }
 
         if (preg_match('~^/api/yonetim/(\d+)$~',$adres,$eslesenler) && $istek === 'PUT'){
-            return ['mesaj' => 'Menü güncellendi.','menu_id' => menuyuKaydet(sayiKontrolu($eslesenler[1]),menuBilgileriniDogrula($gelen))];
+            return ['mesaj' => 'Menü güncellendi.','menu_id' => menuyuKaydetVeOnbellegiSil(sayiKontrolu($eslesenler[1]),menuBilgileriniDogrula($gelen))];
         }
     }
 
