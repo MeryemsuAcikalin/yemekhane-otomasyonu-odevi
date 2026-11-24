@@ -1,0 +1,353 @@
+:root{
+    --ana: #c0ccce;
+    --anaKoyu: #6f6f6f;
+    --zemin: #f4f8f7;
+    --beyaz: #ffffff;
+    --yazi: #000000;
+    --soluk: #161616;
+    --cizgi: #d9e4e2;
+    --hata: #c82116;
+    --basari: #137a29;
+    --kose: 10px;
+}
+*,
+*::before,
+*::after{
+    box-sizing: border-box;
+}
+html{
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+body{
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--zemin);
+    color: var(--yazi);
+    line-height: 1.5;
+}
+[hidden]{
+    display: none !important;
+}
+.ustAlan{
+    width: 100%;
+    background: var(--ana);
+    color: var(--yazi);
+    padding: 18px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.ustAlan h1{
+    margin: 0;
+    font-size: 20px;
+}
+#hesap{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    min-width: 0;
+}
+main{
+    width: min(1000px, calc(100% - 24px));
+    max-width: 100%;
+    min-width: 0;
+    margin: 20px auto;
+}
+#uygulama{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+.girisKutusu{
+    width: 100%;
+    max-width: 450px;
+    margin: 30px auto;
+    padding: 30px;
+    background: var(--beyaz);
+    border: 1px solid var(--cizgi);
+    border-radius: var(--kose);
+    box-shadow: 0 8px 24px rgba(69, 69, 69, 0.06);
+}
+h2{
+    margin-top: 0;
+    color: var(--anaKoyu);
+}
+h3{
+    color: var(--anaKoyu);
+}
+p{
+    color: var(--soluk);
+}
+form{
+    display: grid;
+    gap: 10px;
+    margin: 10px 0 20px;
+    min-width: 0;
+}
+label{
+    font-weight: normal;
+}
+input,select,textarea{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 10px 10px;
+    border: 1px solid var(--cizgi);
+    border-radius: 8px;
+    background: var(--beyaz);
+    color: var(--yazi);
+    font: inherit;
+}
+input:focus,select:focus,textarea:focus{
+    outline: 2px solid var(--anaKoyu);
+    outline-offset: 1px;
+}
+textarea{
+    resize: vertical;
+}
+button{
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--ana);
+    color: var(--yazi);
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover{
+    background: var(--anaKoyu);
+    color: var(--beyaz);
+}
+button:disabled{
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.gezinme{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    min-width: 0;
+}
+.gezinme button{
+    flex: 1 1 auto;
+}
+.gezinme button.aktif{
+    background: var(--anaKoyu);
+    color: var(--beyaz);
+    box-shadow: inset 0 -3px 0 var(--beyaz);
+}
+.sayfa{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 25px;
+    background: var(--beyaz);
+    border: 1px solid var(--cizgi);
+    border-radius: var(--kose);
+    margin-bottom: 20px;
+    overflow-wrap: break-word;
+}
+#mesaj{
+    margin-bottom: 15px;
+    overflow-wrap: anywhere;
+}
+#mesaj:not(:empty){
+    padding: 10px 15px;
+    border-radius: 8px;
+    background: #e9f4ee;
+    color: var(--basari);
+    border: 1px solid #000000;
+}
+#mesaj.hata:not(:empty){
+    background: #fff0ee;
+    color: var(--hata);
+    border-color: #000000;
+}
+#gunlukMenuFormu{
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 12px;
+}
+#gunlukMenuFormu button{
+    grid-column: 1 / -1;
+}
+#gunlukMenuSonucu,
+#haftaSonuc,
+#rezSonuc,
+#hareketSonuc,
+#yonetimListe{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 18px;
+}
+.kart{
+    padding: 15px;
+    border: 1px solid var(--cizgi);
+    border-radius: 10px;
+    background: var(--beyaz);
+    margin-bottom: 15px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.kart h3{
+    margin-top: 0;
+}
+.kart p{
+    margin: 10px 0;
+}
+.kart button{
+    max-width: 100%;
+    margin-top: 10px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+.kartlar{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(min(250px,100%),1fr));
+    gap: 15px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+}
+.kartlar .kart{
+    margin-bottom: 0;
+}
+.bakiyeKutusu{
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 10px;
+    background: #eaf3f0;
+    border: 1px solid var(--cizgi);
+}
+.bakiyeKutusu h3{
+    margin-top: 0;
+}
+#bakiyeDeger{
+    font-size: 30px;
+    font-weight: bold;
+    color: var(--anaKoyu);
+    margin: 0;
+}
+table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+th,td{
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--cizgi);
+}
+th{
+    background: #eaf3f0;
+}
+.tabloAlani{
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.tabloAlani table{
+    min-width: 650px;
+}
+.yemekSecenekleri{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(min(190px,100%),1fr));
+    gap: 10px;
+    min-width: 0;
+}
+.yemekSecenekleri label{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: normal;
+    padding: 10px;
+    border: 1px solid var(--cizgi);
+    border-radius: 10px;
+    min-width: 0;
+}
+.yemekSecenekleri input{
+    width: auto;
+    margin-top: 5px;
+}
+.kucukYazi{
+    font-size: 15px;
+    color: var(--soluk);
+}
+
+@media(max-width: 600px){
+    .ustAlan{
+        padding: 15px;
+    }
+    .ustAlan h1{
+        font-size: 19px;
+    }
+    #hesap{
+        width: 100%;
+        justify-content: space-between;
+    }
+    main{
+        width: calc(100% - 20px);
+        max-width: calc(100% - 20px);
+        margin: 12px auto;
+    }
+    .girisKutusu{
+        padding: 15px;
+    }
+    .gezinme{
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 10px;
+        width: 100%;
+        max-width: 100%;
+    }
+    .gezinme button{
+        display: block;
+        width: 100%;
+        min-width: 0;
+        padding: 12px 5px;
+        font-size: 12px;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+    .sayfa{
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 15px;
+    }
+    #gunlukMenuFormu{
+        grid-template-columns: minmax(0,1fr);
+    }
+    .kartlar{
+        grid-template-columns: minmax(0,1fr);
+    }
+    .yemekSecenekleri{
+        grid-template-columns: minmax(0,1fr);
+    }
+    #yonetimListe,
+    #hareketSonuc{
+        max-width: 100%;
+        min-width: 0;
+    }
+    .tabloAlani{
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+    }
+    input,select,textarea{
+        max-width: 100%;
+    }
+}
